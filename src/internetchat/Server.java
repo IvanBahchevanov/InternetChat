@@ -19,7 +19,7 @@ public class Server {
     private ServGui servGui;
     
     public Server(int port, ServGui servGui) {
-        
+        running = true;
         this.port = port;
         this.servGui = servGui;
         clientList = new ArrayList<>();
@@ -27,9 +27,9 @@ public class Server {
     }
     
     public void startServer()  {
-        running = true;
+        
         try {
-            // start the sever
+            // starts the sever
             ServerSocket serverSocket = new ServerSocket(port);
             servGui.writeToEventArea("server started on port: " + port);
             
@@ -37,26 +37,32 @@ public class Server {
                 
                 // wait for new clients to connect
                 Socket socket = serverSocket.accept();
-                String event = socket.getInetAddress() + ":" + socket.getPort();
-                servGui.writeToEventArea(event);
+                if (!running) {
+                    break;
+                }
+             //   String event = socket.getInetAddress() + ":" + socket.getPort();
+              //  servGui.writeToEventArea(event);
                 
                 // start new thread for each new client
                 ClientThread ct = new ClientThread(socket);
                 clientList.add(ct);
                 ct.start();
             }
-            
+            servGui.writeToEventArea("server is stopped...");
             // running is now false, must close the server            
             try {
                 
                 serverSocket.close();
                 
                 for (int i = 0; i < clientList.size(); i++) {
-                    
-                    ClientThread ctd = clientList.get(i);
-                    ctd.mInput.close();
-                    ctd.mOutput.close();
-                    ctd.socket.close();
+                    try {
+                        ClientThread ctd = clientList.get(i);
+                        ctd.mInput.close();
+                        ctd.mOutput.close();
+                        ctd.socket.close();
+                        
+                    } catch (Exception e) {
+                    }                    
                 }
                 
             } catch (Exception e) {
@@ -67,6 +73,14 @@ public class Server {
             servGui.writeToEventArea("can't start the server...");
             servGui.writeToEventArea(e.toString());
         }
+    }
+    
+    public void stopServer() {
+        running = false;
+        try {
+            new Socket("localhost",port);
+        } catch (Exception e) {
+        }        
     }
     
     private synchronized void sendToAllClients(String msg) {
@@ -139,8 +153,7 @@ public class Server {
             }
             
             removeClient(id);
-            closeMe();
-            
+            closeMe();            
         }
         
         public boolean writeToClient(String msg) {
@@ -165,8 +178,7 @@ public class Server {
                 socket.close();
             } catch (Exception e) {
             }
-        }
-        
+        }        
     }       
     
 }

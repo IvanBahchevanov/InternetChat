@@ -18,8 +18,6 @@ import javax.swing.JTextField;
  *
  * @author Ivan Bahchevanov
  */
-
-
 public class ServGui extends JFrame implements ActionListener {
     private Server server;
     private JTextArea txtEventsArea;
@@ -49,8 +47,7 @@ public class ServGui extends JFrame implements ActionListener {
         txtChatArea = new JTextArea(60, 60);
         txtChatArea.setEditable(false);
         center.add(txtChatArea);
-        center.add(new JScrollPane(txtChatArea));
-        
+        center.add(new JScrollPane(txtChatArea));        
         
         add(north, BorderLayout.NORTH);
         add(center,BorderLayout.CENTER);
@@ -62,28 +59,6 @@ public class ServGui extends JFrame implements ActionListener {
         setAlwaysOnTop(true);
         pack();
     }  
-
-    @Override
-    public void actionPerformed(ActionEvent ev) {
-        if (ev.getSource().equals(btnStart)) {
-            if ( server == null) {
-                try {      
-                    
-                    int port = Integer.parseInt(txtPortField.getText());  
-                    server = new Server(port, this);
-                    new ServerThread().start();
-                    
-                } catch (Exception e) {
-                    writeToEventArea("enter port number...");
-                }
-            }
-            
-        }
-        
-        if (ev.getSource().equals(btnStop)) {
-            
-        }
-    }
     
     public void writeToEventArea(String msg) {
         String event = msg + "\n" ;
@@ -95,10 +70,33 @@ public class ServGui extends JFrame implements ActionListener {
         txtChatArea.append(event);
     }
     
+    @Override
+    public void actionPerformed(ActionEvent ev) {
+        if (ev.getSource().equals(btnStop)) {
+            if (server != null) {            
+                server.stopServer();
+                server = null;                
+            }   
+            return;
+        }
+        if(server == null) {
+            int port;
+            try {      
+                 port = Integer.parseInt(txtPortField.getText());             
+
+            } catch (Exception e) {  
+                return;
+            }
+            server = new Server(port, this);
+            new ServerThread().start();
+        }
+    }
     
     class ServerThread extends Thread {
          public void run() {
              server.startServer();
+             // the server is stopped now
+             server = null;
          }
     }
 }
