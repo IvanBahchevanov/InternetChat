@@ -16,14 +16,15 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
+// 46.249.93.205
 /**
- *
+ * this class represents the GUI for the chat client.
  * @author Ivan Bahchevanov
  */
 
 public class InternetChatClient extends JFrame implements ActionListener{
     
-    private Client client;
+    protected Client client;
     private JTextArea txtMsgArea;
     private JTextField txtServer;
     private JTextField txtPort;
@@ -36,7 +37,10 @@ public class InternetChatClient extends JFrame implements ActionListener{
         super("Internet Chat : Client");
         initGui();
     }
-    
+    /**
+     * prints every msg from the server
+     * @param msg 
+     */
     public void printMessage(String msg) {
         String message = msg + "\n";
         txtMsgArea.append(message);
@@ -46,11 +50,13 @@ public class InternetChatClient extends JFrame implements ActionListener{
     public static void main(String[] args) {
         new InternetChatClient();
     }
-    
+    /**
+     * initializes the GUI
+     */
     private void initGui() {        
         JPanel north = new JPanel();
         txtServer = new JTextField(15);
-        txtServer.setText("127.0.0.1");
+        txtServer.setText("46.249.93.205");
         north.add(new JLabel("Server:"));
         north.add(txtServer);
         txtPort = new JTextField(5);
@@ -67,6 +73,7 @@ public class InternetChatClient extends JFrame implements ActionListener{
         
         JPanel south = new JPanel();
         txtMsgField = new JTextField(45);
+        
         txtMsgField.addKeyListener(new keyListener());
         south.add(txtMsgField);
         btnSubmit = new JButton("Submit");
@@ -75,14 +82,13 @@ public class InternetChatClient extends JFrame implements ActionListener{
         
         JPanel center = new JPanel(new GridLayout(2, 1));
         txtMsgArea = new JTextArea(30, 40);
-        txtMsgArea.setEditable(false);
+        txtMsgArea.setEditable(false);        
         center.add(txtMsgArea);
         center.add(new JScrollPane(txtMsgArea));
         center.add(south);
         
         add(north, BorderLayout.NORTH);
-        add(center, BorderLayout.CENTER);
-       // add(south, BorderLayout.SOUTH);
+        add(center, BorderLayout.CENTER);       
         
         addKeyListener(new keyListener());
         setPreferredSize(new Dimension(600, 400));
@@ -93,10 +99,25 @@ public class InternetChatClient extends JFrame implements ActionListener{
         pack();
     }
 
+    public void enableControls() {        
+        btnEnter.setEnabled(true);
+        txtName.setEditable(true);
+        txtPort.setEditable(true);
+        txtServer.setEditable(true);
+    }
+    
+    public void disableControls() {
+        btnEnter.setEnabled(false);
+        txtName.setEditable(false);
+        txtPort.setEditable(false);
+        txtServer.setEditable(false);
+    }
+    
     @Override
     public void actionPerformed(ActionEvent ev) {
-        
+        // try to connect to server
         if (ev.getSource().equals(btnEnter)) {
+
             if (client == null) {
                 int port;
                 String host;
@@ -108,16 +129,19 @@ public class InternetChatClient extends JFrame implements ActionListener{
                 } catch (Exception e) {
                     return;
                 }
-                txtServer.setEditable(false);
-                txtPort.setEditable(false);
-                txtName.setEditable(false);
-                btnEnter.setEnabled(false);
                 client = new Client(host, port, name, this);
-                client.startClient();
-            }
-            
+               
+                 if( client.startClient()) {
+                        disableControls();
+                 }
+                 else {
+                     client = null;
+                     enableControls();
+                 }
+            }            
         }
         
+        // sends a message, if connected
         if (ev.getSource().equals(btnSubmit)) {
             if (client != null) {
                 String msg;
@@ -134,10 +158,13 @@ public class InternetChatClient extends JFrame implements ActionListener{
         }
     }
     
+    /**
+     * a keylistener for the @btnSubmit
+     */
     class keyListener implements KeyListener {
         
         @Override
-        public void keyPressed(KeyEvent ev) {
+       public void keyPressed(KeyEvent ev) {
             if (ev.getKeyCode() == KeyEvent.VK_ENTER) {
                 if (client != null ) {
                     String msg;
@@ -151,23 +178,6 @@ public class InternetChatClient extends JFrame implements ActionListener{
                         client.sendMessage(msg);
                     }
                 }
-                else {
-                    int port;
-                    String host;
-                    String name;
-                    try {
-                        host = txtServer.getText();
-                        port = Integer.parseInt(txtPort.getText());
-                        name = txtName.getText();
-                    } catch (Exception e) {
-                        return;
-                    }
-                    txtServer.setEditable(false);
-                    txtPort.setEditable(false);
-                    txtName.setEditable(false);
-                    client = new Client(host, port, name, InternetChatClient.this);
-                    client.startClient();
-                }
             }
         }
 
@@ -177,7 +187,6 @@ public class InternetChatClient extends JFrame implements ActionListener{
         @Override
         public void keyTyped(KeyEvent ev) {}    
     }
-
 }
 
 

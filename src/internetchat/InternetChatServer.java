@@ -28,7 +28,10 @@ public class InternetChatServer {
     }
 }
 
-
+/**
+ * this represents the GUI for the server.
+ * @author _user
+ */
 class ServGui extends JFrame implements ActionListener {
     
     private Server server;
@@ -72,19 +75,29 @@ class ServGui extends JFrame implements ActionListener {
         setAlwaysOnTop(true);
         pack();
     }  
-    
+    /**
+     * this logs every event in the event are
+     * @param msg 
+     */
     public void writeToEventArea(String msg) {
         String event = msg + "\n" ;
         txtEventsArea.append(event);
         txtEventsArea.setCaretPosition(txtEventsArea.getText().length() - 1);
     }
     
+    /**
+     * every chat msg is printed in the chat area
+     * @param msg 
+     */
     public void writeToChatArea(String msg) {
         String event = msg + "\n" ;
         txtChatArea.append(event);
         txtChatArea.setCaretPosition(txtChatArea.getText().length() - 1);
     }
-    
+    /**
+     * starts and stops the server
+     * @param ev 
+     */
     @Override
     public void actionPerformed(ActionEvent ev) {
         if (ev.getSource().equals(btnStop)) {
@@ -108,7 +121,9 @@ class ServGui extends JFrame implements ActionListener {
             new ServerThread().start();
         }
     }
-    
+    /**
+     * this thread runs the server .
+     */
     class ServerThread extends Thread {
          public void run() {
              server.startServer();
@@ -117,7 +132,9 @@ class ServGui extends JFrame implements ActionListener {
              server = null;
          }
     }
-    
+    /**
+     * keylistener 
+     */
     class KeyAdapt implements  KeyListener {
 
         @Override
